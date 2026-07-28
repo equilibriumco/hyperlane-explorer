@@ -15,6 +15,12 @@ export const COLLATERAL_TOKEN_STANDARDS: TokenStandard[] = [
   ...TOKEN_COLLATERALIZED_STANDARDS,
   TokenStandard.EvmHypCollateralFiat,
   TokenStandard.CosmosIbc,
+  // Midnight standards ship with the midnight protocol changeset
+  // (TokenStandard.MidnightHyp*); until this app's SDK version carries
+  // them, recognize the strings directly (same pattern as the Starknet
+  // workaround in features/messages/collateral/utils.ts).
+  'MidnightHypNative' as TokenStandard,
+  'MidnightHypCollateral' as TokenStandard,
 ];
 
 export const CROSS_COLLATERAL_TOKEN_STANDARDS: TokenStandard[] = Array.from(

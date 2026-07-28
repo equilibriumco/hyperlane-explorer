@@ -37,6 +37,11 @@ export function postgresByteaToAddress(
   byteString: string,
   chainMetadata: ChainMetadata | null | undefined,
 ): Address {
+  // The scraper's transaction.recipient column is nullable and is NULL for
+  // chains whose transactions have no recipient (e.g. Midnight). The parse
+  // helpers swallow exceptions and drop the whole message, surfacing
+  // "Message not found" for a row the API already returned.
+  if (!byteString || byteString.length < 4) return '';
   const hexString = postgresByteaToString(byteString);
   if (!chainMetadata) return hexString;
   const addressBytes = Buffer.from(strip0x(hexString), 'hex');
