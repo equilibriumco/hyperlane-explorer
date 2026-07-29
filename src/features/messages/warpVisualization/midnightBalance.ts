@@ -6,10 +6,8 @@ interface MidnightBalanceToken {
   standard?: string;
 }
 
-// Client for /api/midnight-warp-route-balance (see the API route for the
-// server-side details): returns the warp contract's locked native NIGHT in
-// atomic units, or undefined when the balance is unavailable. Shared by the
-// Warp Route Overview balances and the destination collateral check.
+// Client for /api/midnight-warp-route-balance: returns the warp contract's
+// locked native NIGHT in atomic units, or undefined when unavailable.
 export async function fetchMidnightWarpRouteBalance(
   token: MidnightBalanceToken,
 ): Promise<bigint | undefined> {

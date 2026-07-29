@@ -57,10 +57,8 @@ export function isEvmChain(
 }
 
 // Chains eligible for the message status timeline. Delivered-message stage
-// timings are protocol-agnostic arithmetic over DB timestamps and blocks
-// metadata; only the pending-message probes are EVM-shaped, and those fail
-// soft (the stage just stays at "Sent"). Midnight therefore qualifies
-// alongside EVM.
+// timings are protocol-agnostic arithmetic over DB timestamps; the pending
+// probes are EVM-shaped but fail soft, so Midnight qualifies alongside EVM.
 export function isTimelineChain(
   chainMetadataResolver: Pick<ChainMetadataResolver, 'tryGetProtocol'>,
   domainId: DomainId,

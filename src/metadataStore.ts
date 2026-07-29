@@ -245,11 +245,10 @@ async function loadWarpRouteData(registry: IRegistry): Promise<{
 }
 
 // Token icons resolve relative logo paths against the canonical registry's
-// CDN (links.imgPath); when a custom registry is configured, its routes'
-// logos do not exist there and the icons fall back to letters. Rewrite the
-// relative paths to absolute URLs on the configured registry instead. The
-// published-configs fallback below is deliberately left untouched: its
-// relative paths refer to canonical content, which the CDN does serve.
+// CDN (links.imgPath); a custom registry's logos do not exist there, so the
+// icons fall back to letters. Rewrite the relative paths to absolute URLs on
+// the configured registry instead. The published-configs fallback keeps its
+// relative paths — those refer to canonical content the CDN does serve.
 function resolveTokenLogoUris(
   warpRouteConfigs: WarpRouteConfigs,
   registry: IRegistry,
