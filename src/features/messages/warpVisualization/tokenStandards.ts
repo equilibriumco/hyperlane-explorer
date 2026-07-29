@@ -11,6 +11,14 @@ export const SUPPORTED_SEALEVEL_BALANCE_STANDARDS: TokenStandard[] = [
   TokenStandard.SealevelHypSynthetic,
 ];
 
+// Midnight standards whose balances the explorer can read (server-side, via
+// /api/midnight-warp-route-balance). Native only: the deployed Midnight warp
+// contract locks native NIGHT; a collateral variant would need a token-type
+// mapping in the API route first.
+export const SUPPORTED_MIDNIGHT_BALANCE_STANDARDS: TokenStandard[] = [
+  'MidnightHypNative' as TokenStandard,
+];
+
 export const COLLATERAL_TOKEN_STANDARDS: TokenStandard[] = [
   ...TOKEN_COLLATERALIZED_STANDARDS,
   TokenStandard.EvmHypCollateralFiat,
