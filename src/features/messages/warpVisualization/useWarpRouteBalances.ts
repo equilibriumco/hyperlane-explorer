@@ -10,6 +10,7 @@ import { useMemo } from 'react';
 import { useMultiProviderVersion, useReadyMultiProvider } from '../../../store';
 import { logger } from '../../../utils/logger';
 import type { ExplorerMultiProvider as MultiProtocolProvider } from '../../hyperlane/sdkRuntime';
+import { fetchMidnightWarpRouteBalance } from './midnightBalance';
 import {
   SUPPORTED_MIDNIGHT_BALANCE_STANDARDS,
   SUPPORTED_SEALEVEL_BALANCE_STANDARDS,
@@ -110,19 +111,7 @@ async function fetchSealevelTokenBalance(
 async function fetchMidnightTokenBalance(
   token: WarpRouteTokenVisualization,
 ): Promise<ChainBalance | undefined> {
-  const params = new URLSearchParams({
-    chainName: token.chainName,
-    addressOrDenom: token.addressOrDenom,
-    standard: token.standard || '',
-  });
-
-  const response = await fetch(`/api/midnight-warp-route-balance?${params.toString()}`);
-  if (!response.ok) {
-    logger.debug(`Midnight balance API ${response.status} for ${token.chainName}:${token.symbol}`);
-    return undefined;
-  }
-
-  const balance = getApiBalance(await response.json());
+  const balance = await fetchMidnightWarpRouteBalance(token);
   return balance === undefined ? undefined : { balance };
 }
 
