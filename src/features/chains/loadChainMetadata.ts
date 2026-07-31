@@ -32,10 +32,8 @@ export async function loadChainMetadata(
         // The CDN path only serves the canonical registry; when a custom
         // registry is configured, resolve logos through it so its chains
         // are not iconless.
-        logoURI: config.registryUrl
-          ? ((await registry.getChainLogoUri(chainName)) ??
-            `${links.imgPath}/chains/${chainName}/logo.svg`)
-          : `${links.imgPath}/chains/${chainName}/logo.svg`,
+        logoURI: (config.registryUrl ? await registry.getChainLogoUri(chainName) : null) ??
+          `${links.imgPath}/chains/${chainName}/logo.svg`,
       }),
     ),
   );
