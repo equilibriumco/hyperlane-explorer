@@ -25,8 +25,6 @@ shaped so every piece maps onto an upstream submission:
   registry instead of the hardcoded canonical CDN path.
 - `config.apiUrl` reads `NEXT_PUBLIC_API_URL` so the app can point at a
   local scraper + Hasura stack.
-- The message status timeline renders for Midnight messages and gets a
-  `multiProvider`, so delivered messages show real per-stage timings.
 - `postgresByteaToAddress` tolerates NULL bytea columns (Midnight
   transactions have no public recipient).
 - `MidnightHypNative`/`MidnightHypCollateral` are recognized for
@@ -35,9 +33,9 @@ shaped so every piece maps onto an upstream submission:
 
 Known limits: `origin_tx_sender` shows "Unknown" (Midnight transactions
 have no public sender), there are no Midnight block-explorer links yet, and
-the live-RPC features (Warp Route Security ISM tree, collateral balances,
-pending-message debugging) stay EVM-only, as they are upstream for every
-non-EVM chain.
+the message status timeline and the live-RPC features (Warp Route Security
+ISM tree, collateral balances, pending-message debugging) stay EVM-only, as
+they are upstream for every non-EVM chain.
 
 ## Setup
 

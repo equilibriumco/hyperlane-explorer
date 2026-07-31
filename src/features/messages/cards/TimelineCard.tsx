@@ -1,7 +1,6 @@
 import { MessageTimeline, useMessageStage } from '@hyperlane-xyz/widgets';
 
 import { Card } from '../../../components/layout/Card';
-import { useMultiProvider } from '../../../store';
 import { Message, MessageStub } from '../../../types';
 
 interface Props {
@@ -10,12 +9,8 @@ interface Props {
 }
 
 export function TimelineCard({ message, blur }: Props) {
-  // Without the multiProvider the hook rejects on its first metadata read
-  // and the timeline renders inert: delivered messages get no per-stage
-  // timings and pending ones sit at "Sent" forever.
-  const multiProvider = useMultiProvider();
   // @ts-ignore TODO update widget chainId type
-  const { stage, timings } = useMessageStage({ message, multiProvider });
+  const { stage, timings } = useMessageStage({ message });
 
   return (
     <Card className="w-full !bg-transparent !shadow-none">

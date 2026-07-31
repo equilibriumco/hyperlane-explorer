@@ -55,14 +55,3 @@ export function isEvmChain(
   const protocol = chainMetadataResolver.tryGetProtocol(domainId);
   return protocol === ProtocolType.Ethereum;
 }
-
-// Chains eligible for the message status timeline. Delivered-message stage
-// timings are protocol-agnostic arithmetic over DB timestamps; the pending
-// probes are EVM-shaped but fail soft, so Midnight qualifies alongside EVM.
-export function isTimelineChain(
-  chainMetadataResolver: Pick<ChainMetadataResolver, 'tryGetProtocol'>,
-  domainId: DomainId,
-) {
-  const protocol = chainMetadataResolver.tryGetProtocol(domainId);
-  return protocol === ProtocolType.Ethereum || protocol === ProtocolType.Midnight;
-}
