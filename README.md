@@ -8,13 +8,15 @@ This fork adds support for the Cardano chain (domain 2003), shaped so every
 piece maps onto an upstream submission:
 
 - `@hyperlane-xyz/utils` is overridden (see `pnpm-workspace.yaml`) with a build
-  carrying `ProtocolType.Cardano` and its address codecs. The vendored tarball
-  in `vendor/` is built from `equilibriumco/hyperlane-monorepo` branch
-  `cardano-explorer`, whose `utils` differs from the upstream 33.0.2 release
-  (`4815a47cc`) by exactly the cardano protocol commit. utils resolves once in
-  the dependency graph, so sdk/widgets pick it up and `protocol: 'cardano'`
-  survives metadata validation without an sdk override. The override
-  disappears once upstream ships the protocol.
+  carrying `ProtocolType.Cardano` and `ProtocolType.Midnight` plus their address
+  codecs, vendored in `vendor/` and built from
+  `equilibriumco/hyperlane-monorepo` branch `cardano-midnight`. utils resolves
+  once in the dependency graph, so sdk/widgets pick it up and
+  `protocol: 'cardano'` / `'midnight'` survive metadata validation without an
+  sdk override. Without it those chains still load, but degrade to
+  `ProtocolType.Unknown` (`forwardCompatibleEnum` maps unrecognised values
+  rather than rejecting them), losing address formatting, the timeline and the
+  warp sections. The override disappears once upstream ships the protocols.
 - Chain metadata, addresses, logos, and the wADA warp route come from the
   registry: point `NEXT_PUBLIC_REGISTRY_URL` / `NEXT_PUBLIC_REGISTRY_BRANCH` at
   `equilibriumco/hyperlane-registry` branch `cardano` (see `.env.example`) —
