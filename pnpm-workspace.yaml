@@ -12,7 +12,7 @@ overrides:
   # midnight-cardano, whose utils differs from that branch's upstream base by
   # exactly the cardano and midnight protocol commits. All of this disappears
   # once upstream ships them.
-  '@hyperlane-xyz/utils': file:vendor/hyperlane-xyz-utils-36.0.0-cardano-midnight.tgz
+  '@hyperlane-xyz/utils': file:vendor/hyperlane-xyz-utils-36.0.0-midnight-cardano.tgz
   # Overriding utils re-resolves its subtree (@solana/web3.js -> rpc-websockets
   # -> uuid), which pulls the ESM-only uuid v14 that Jest cannot parse. Pin it
   # to what the lockfile resolved before. Goes away with the override above.
