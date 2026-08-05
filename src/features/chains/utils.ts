@@ -66,5 +66,9 @@ export function isTimelineChain(
   domainId: DomainId,
 ) {
   const protocol = chainMetadataResolver.tryGetProtocol(domainId);
-  return protocol === ProtocolType.Ethereum || protocol === ProtocolType.Cardano;
+  return (
+    protocol === ProtocolType.Ethereum ||
+    protocol === ProtocolType.Cardano ||
+    protocol === ProtocolType.Midnight
+  );
 }
