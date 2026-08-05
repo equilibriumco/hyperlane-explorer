@@ -10,7 +10,7 @@ chains, shaped so every piece maps onto an upstream submission:
 - `@hyperlane-xyz/utils` is overridden (see `pnpm-workspace.yaml`) with a build
   carrying `ProtocolType.Cardano` and `ProtocolType.Midnight` plus their address
   codecs, vendored in `vendor/` and built from
-  `equilibriumco/hyperlane-monorepo` branch `cardano-midnight`. utils resolves
+  `equilibriumco/hyperlane-monorepo` branch `midnight-cardano`. utils resolves
   once in the dependency graph, so sdk/widgets pick it up and
   `protocol: 'cardano'` / `'midnight'` survive metadata validation without an
   sdk override. Without it those chains still load, but degrade to

@@ -9,7 +9,7 @@ overrides:
   # forwardCompatibleEnum reads the enum at runtime - `protocol: 'cardano'` and
   # `'midnight'` survive metadata validation without an sdk override. The
   # vendored tarball is built from equilibriumco/hyperlane-monorepo branch
-  # cardano-midnight, whose utils differs from that branch's upstream base by
+  # midnight-cardano, whose utils differs from that branch's upstream base by
   # exactly the cardano and midnight protocol commits. All of this disappears
   # once upstream ships them.
   '@hyperlane-xyz/utils': file:vendor/hyperlane-xyz-utils-36.0.0-cardano-midnight.tgz
