@@ -12,6 +12,7 @@ import { useMultiProviderVersion, useReadyMultiProvider } from '../../../store';
 import { Message, MessageStatus, MessageStub, WarpRouteDetails } from '../../../types';
 import { logger } from '../../../utils/logger';
 import type { ExplorerMultiProvider as MultiProtocolProvider } from '../../hyperlane/sdkRuntime';
+import { fetchMidnightWarpRouteBalance } from '../warpVisualization/midnightBalance';
 import { CollateralInfo, CollateralStatus } from './types';
 import { calculateCollateralStatus, isCctpRoute, isCollateralRoute } from './utils';
 
@@ -21,11 +22,13 @@ const COLLATERAL_STALE_TIME = 20000; // 20 seconds
 
 /**
  * Fetches collateral for EVM hyp tokens without pulling the full runtime Token graph.
+ * Resolves null (never undefined — react-query treats an undefined resolution
+ * as an error) when the balance cannot be determined.
  */
 async function fetchCollateralBalance(
   destinationToken: WarpRouteDetails['destinationToken'],
   multiProvider: MultiProtocolProvider,
-): Promise<bigint | undefined> {
+): Promise<bigint | null> {
   try {
     // Validate token config
     if (!destinationToken.addressOrDenom || !destinationToken.chainName) {
@@ -33,7 +36,7 @@ async function fetchCollateralBalance(
         token: destinationToken.symbol,
         chain: destinationToken.chainName,
       });
-      return undefined;
+      return null;
     }
 
     // Verify chain is configured in multiProvider
@@ -43,7 +46,15 @@ async function fetchCollateralBalance(
         chain: destinationToken.chainName,
         token: destinationToken.symbol,
       });
-      return undefined;
+      return null;
+    }
+
+    // Midnight collateral is read server-side via the chain's indexer (the
+    // browser runtime has no Midnight provider) — the same path the Warp
+    // Route Overview balances use.
+    if (chainMetadata.protocol === ProtocolType.Midnight) {
+      const balance = await fetchMidnightWarpRouteBalance(destinationToken);
+      return balance ?? null;
     }
 
     if (chainMetadata.protocol !== ProtocolType.Ethereum) {
@@ -52,7 +63,7 @@ async function fetchCollateralBalance(
         protocol: chainMetadata.protocol,
         token: destinationToken.symbol,
       });
-      return undefined;
+      return null;
     }
 
     // Verify we can get a provider for this chain
@@ -63,7 +74,7 @@ async function fetchCollateralBalance(
         chain: destinationToken.chainName,
         error: providerError,
       });
-      return undefined;
+      return null;
     }
 
     const adapter = createEvmHypAdapter(multiProvider, destinationToken);
@@ -73,7 +84,7 @@ async function fetchCollateralBalance(
         token: destinationToken.symbol,
         standard: destinationToken.standard,
       });
-      return undefined;
+      return null;
     }
 
     // For xERC20 lockboxes, collateral is held by lockbox(), not the router address.
@@ -110,7 +121,7 @@ async function fetchCollateralBalance(
         token: destinationToken.symbol,
         address: destinationToken.addressOrDenom,
       });
-      return undefined;
+      return null;
     }
 
     // For non-lockbox collateral types, check the router balance directly.
@@ -130,7 +141,7 @@ async function fetchCollateralBalance(
       token: destinationToken.symbol,
       address: destinationToken.addressOrDenom,
     });
-    return undefined;
+    return null;
   }
 }
 
@@ -192,7 +203,7 @@ export function useCollateralStatus(
     // eslint-disable-next-line @tanstack/query/exhaustive-deps
     queryKey,
     queryFn: () => {
-      if (!destinationToken || !multiProvider) return Promise.resolve(undefined);
+      if (!destinationToken || !multiProvider) return Promise.resolve(null);
       return fetchCollateralBalance(destinationToken, multiProvider);
     },
     enabled: !!destinationToken && shouldCheck && !!multiProvider,
@@ -216,7 +227,7 @@ export function useCollateralStatus(
     return { status: CollateralStatus.Checking };
   }
 
-  if (collateralBalance === undefined) {
+  if (collateralBalance == null) {
     return { status: CollateralStatus.Unknown };
   }
 

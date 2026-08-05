@@ -12,7 +12,7 @@ import {
   type WarpRouteConfigs,
   type WarpRouteIdToAddressesMap,
 } from '@hyperlane-xyz/sdk/warp/read';
-import { objFilter } from '@hyperlane-xyz/utils';
+import { isRelativeUrl, objFilter, objMap } from '@hyperlane-xyz/utils';
 import { useMemo } from 'react';
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
@@ -231,7 +231,7 @@ async function loadWarpRouteData(registry: IRegistry): Promise<{
 
   try {
     logger.debug('Building warp route maps from GithubRegistry');
-    warpRouteConfigs = await registry.getWarpRoutes();
+    warpRouteConfigs = resolveTokenLogoUris(await registry.getWarpRoutes(), registry);
   } catch (error) {
     logger.error('Failed to build warp route maps from registry', error);
     if (!canUsePublishedWarpRouteFallback(registry)) throw error;
@@ -242,6 +242,26 @@ async function loadWarpRouteData(registry: IRegistry): Promise<{
   }
 
   return buildWarpRouteMaps(warpRouteConfigs);
+}
+
+// Token icons resolve relative logo paths against the canonical registry's
+// CDN (links.imgPath); a custom registry's logos do not exist there, so the
+// icons fall back to letters. Rewrite the relative paths to absolute URLs on
+// the configured registry instead. The published-configs fallback keeps its
+// relative paths — those refer to canonical content the CDN does serve.
+function resolveTokenLogoUris(
+  warpRouteConfigs: WarpRouteConfigs,
+  registry: IRegistry,
+): WarpRouteConfigs {
+  if (!config.registryUrl) return warpRouteConfigs;
+  return objMap(warpRouteConfigs, (_routeId, routeConfig) => ({
+    ...routeConfig,
+    tokens: routeConfig.tokens.map((token) =>
+      token.logoURI && isRelativeUrl(token.logoURI)
+        ? { ...token, logoURI: registry.getUri(token.logoURI) }
+        : token,
+    ),
+  }));
 }
 
 function canUsePublishedWarpRouteFallback(registry: IRegistry) {

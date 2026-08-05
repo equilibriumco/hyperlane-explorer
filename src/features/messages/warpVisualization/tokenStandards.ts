@@ -18,16 +18,29 @@ export const SUPPORTED_CARDANO_BALANCE_STANDARDS: TokenStandard[] = [
   'CardanoHypNative' as TokenStandard,
 ];
 
+// Midnight standards whose balances the explorer can read (server-side, via
+// /api/midnight-warp-route-balance). Native only: the deployed Midnight warp
+// contract locks native NIGHT; a collateral variant would need a token-type
+// mapping in the API route first.
+export const SUPPORTED_MIDNIGHT_BALANCE_STANDARDS: TokenStandard[] = [
+  // TODO: TokenStandard.MidnightHypNative once the SDK dependency carries it
+  'MidnightHypNative' as TokenStandard,
+];
+
 export const COLLATERAL_TOKEN_STANDARDS: TokenStandard[] = [
   ...TOKEN_COLLATERALIZED_STANDARDS,
   TokenStandard.EvmHypCollateralFiat,
   TokenStandard.CosmosIbc,
-  // Cardano standards ship with the cardano protocol changeset
-  // (TokenStandard.CardanoHyp*); until this app's SDK version carries them,
-  // recognize the strings directly (same pattern as the Starknet workaround
-  // in features/messages/collateral/utils.ts).
+  // Cardano and Midnight standards ship with their protocol changesets
+  // (TokenStandard.CardanoHyp* / MidnightHyp*), which also add them to
+  // TOKEN_COLLATERALIZED_STANDARDS; until this app's SDK version carries them,
+  // recognize the strings directly (same pattern as the Starknet workaround in
+  // features/messages/collateral/utils.ts).
+  // TODO: Remove once the SDK dependency includes the cardano/midnight standards
   'CardanoHypNative' as TokenStandard,
   'CardanoHypCollateral' as TokenStandard,
+  'MidnightHypNative' as TokenStandard,
+  'MidnightHypCollateral' as TokenStandard,
 ];
 
 export const CROSS_COLLATERAL_TOKEN_STANDARDS: TokenStandard[] = Array.from(

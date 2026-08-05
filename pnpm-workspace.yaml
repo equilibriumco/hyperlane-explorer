@@ -3,14 +3,15 @@ minimumReleaseAge: 10080
 minimumReleaseAgeExclude:
   - '@hyperlane-xyz/*'
 overrides:
-  # Cardano + Midnight: @hyperlane-xyz/utils 36.0.0 + both ProtocolTypes and their address
-  # codecs. utils resolves exactly once in this dependency graph, so the
-  # override propagates into sdk/widgets, and the SDK's forwardCompatibleEnum
-  # reads the enum at runtime - `protocol: 'cardano'` survives metadata
-  # validation without an sdk override. The vendored tarball is built from
-  # equilibriumco/hyperlane-monorepo branch cardano-explorer, whose utils
-  # differs from the upstream 33.0.2 release (4815a47cc) by exactly the
-  # cardano protocol commit. All of this disappears once upstream ships it.
+  # Cardano + Midnight: @hyperlane-xyz/utils 36.0.0 + both ProtocolTypes and
+  # their address codecs. utils resolves exactly once in this dependency graph,
+  # so the override propagates into sdk/widgets, and the SDK's
+  # forwardCompatibleEnum reads the enum at runtime - `protocol: 'cardano'` and
+  # `'midnight'` survive metadata validation without an sdk override. The
+  # vendored tarball is built from equilibriumco/hyperlane-monorepo branch
+  # cardano-midnight, whose utils differs from that branch's upstream base by
+  # exactly the cardano and midnight protocol commits. All of this disappears
+  # once upstream ships them.
   '@hyperlane-xyz/utils': file:vendor/hyperlane-xyz-utils-36.0.0-cardano-midnight.tgz
   # Overriding utils re-resolves its subtree (@solana/web3.js -> rpc-websockets
   # -> uuid), which pulls the ESM-only uuid v14 that Jest cannot parse. Pin it
