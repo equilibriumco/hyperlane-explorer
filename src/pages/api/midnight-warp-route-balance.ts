@@ -11,7 +11,8 @@ import { logger } from '../../utils/logger';
 // Server-side balance reads for Midnight warp route tokens, mirroring the
 // Sealevel handler (sealevel-warp-route-balance.ts): the browser bundle has
 // no Midnight provider, so the read happens here against the chain's indexer
-// GraphQL endpoint (the `rpcUrls` entry in the chain's registry metadata).
+// GraphQL endpoint (the `gatewayUrls` entry in the chain's registry
+// metadata; `rpcUrls` carries the node, as on other alt-VM chains).
 //
 // Only the native standard is supported: the deployed Midnight warp contract
 // locks native NIGHT, which the indexer reports under the all-zeros token
@@ -148,7 +149,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(400).json({ error: 'Unknown warp route token' });
     }
 
-    const indexerUrl = chain.rpcUrls?.[0]?.http;
+    // gatewayUrls lives on ChainMetadataForAltVM, not the base schema, so it
+    // arrives as passthrough and needs the cast.
+    const indexerUrl = (chain as { gatewayUrls?: { http: string }[] })
+      .gatewayUrls?.[0]?.http;
     if (!indexerUrl || !indexerUrl.startsWith('http')) {
       return res.status(400).json({ error: 'Chain has no queryable indexer' });
     }
