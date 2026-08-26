@@ -3,6 +3,14 @@ minimumReleaseAge: 10080
 minimumReleaseAgeExclude:
   - '@hyperlane-xyz/*'
 overrides:
+  # Midnight: @hyperlane-xyz/utils 33.0.2 + ProtocolType.Midnight and its
+  # address codecs, built from equilibriumco/hyperlane-monorepo branch
+  # midnight-utils-33.0.2 (based on the upstream 33.0.2 release commit
+  # 4815a47cc). utils resolves exactly once in this dependency graph, so the
+  # override propagates into sdk/widgets, and the SDK's forwardCompatibleEnum
+  # reads the enum at runtime - `protocol: 'midnight'` survives metadata
+  # validation without an sdk override.
+  '@hyperlane-xyz/utils': file:vendor/hyperlane-xyz-utils-33.0.2-midnight.tgz
   tronweb>ethers: ^6.13.5
   ethers: ^5.7
   sha.js: 2.4.12

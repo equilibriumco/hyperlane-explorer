@@ -49,12 +49,20 @@ export function calculateCollateralStatus(available: bigint, required: bigint): 
 // WORKAROUND: SDK is missing Starknet collateral standards from TOKEN_COLLATERALIZED_STANDARDS
 // TODO: Remove this workaround once SDK is fixed
 const STARKNET_COLLATERAL_STANDARDS = ['StarknetHypCollateral', 'StarknetHypNative'];
+// WORKAROUND: Midnight standards ship with the midnight protocol changeset
+// (TokenStandard.MidnightHyp*); until this app's SDK version carries them,
+// recognize them the same way as the Starknet ones above.
+// TODO: Remove once the SDK dependency includes the midnight standards
+const MIDNIGHT_COLLATERAL_STANDARDS = ['MidnightHypNative', 'MidnightHypCollateral'];
 export function isCollateralRoute(tokenStandard?: string): boolean {
   if (!tokenStandard) return false;
   // Check SDK's official list first
   if (TOKEN_COLLATERALIZED_STANDARDS.some((standard) => standard === tokenStandard)) {
     return true;
   }
-  // WORKAROUND: Also check for Starknet collateral standards
-  return STARKNET_COLLATERAL_STANDARDS.includes(tokenStandard);
+  // WORKAROUND: Also check for Starknet and Midnight collateral standards
+  return (
+    STARKNET_COLLATERAL_STANDARDS.includes(tokenStandard) ||
+    MIDNIGHT_COLLATERAL_STANDARDS.includes(tokenStandard)
+  );
 }
