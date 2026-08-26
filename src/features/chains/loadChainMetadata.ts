@@ -7,6 +7,7 @@ import {
 import type { ChainMap } from '@hyperlane-xyz/sdk/types';
 import { objFilter, objMap, promiseObjAll } from '@hyperlane-xyz/utils';
 
+import { config } from '../../consts/config';
 import { links } from '../../consts/links';
 import { logger } from '../../utils/logger';
 
@@ -28,7 +29,11 @@ export async function loadChainMetadata(
       registryChainMetadata,
       async (chainName, metadata): Promise<ChainMetadata> => ({
         ...metadata,
-        logoURI: `${links.imgPath}/chains/${chainName}/logo.svg`,
+        // The CDN path only serves the canonical registry; when a custom
+        // registry is configured, resolve logos through it so its chains
+        // are not iconless.
+        logoURI: (config.registryUrl ? await registry.getChainLogoUri(chainName) : null) ??
+          `${links.imgPath}/chains/${chainName}/logo.svg`,
       }),
     ),
   );

@@ -17,7 +17,7 @@ interface Config {
 export const config: Config = Object.freeze({
   debug: isDevMode,
   version,
-  apiUrl: 'https://explorer4.hasura.app/v1/graphql',
+  apiUrl: process.env.NEXT_PUBLIC_API_URL || 'https://explorer4.hasura.app/v1/graphql',
   explorerApiKeys,
   githubProxy: 'https://proxy.hyperlane.xyz',
   registryBranch,
