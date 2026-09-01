@@ -53,7 +53,11 @@ async function fetchCollateralBalance(
     // browser runtime has no Midnight provider) — the same path the Warp
     // Route Overview balances use.
     if (chainMetadata.protocol === ProtocolType.Midnight) {
-      const balance = await fetchMidnightWarpRouteBalance(destinationToken);
+      const balance = await fetchMidnightWarpRouteBalance({
+        chainName: destinationToken.chainName,
+        addressOrDenom: destinationToken.addressOrDenom,
+        standard: destinationToken.standard,
+      });
       return balance ?? null;
     }
 
@@ -77,7 +81,10 @@ async function fetchCollateralBalance(
       return null;
     }
 
-    const adapter = createEvmHypAdapter(multiProvider, destinationToken);
+    const adapter = createEvmHypAdapter(multiProvider, {
+      ...destinationToken,
+      chainName: destinationToken.chainName,
+    });
     if (!adapter) {
       logger.debug('Skipping collateral check for unsupported token runtime', {
         chain: destinationToken.chainName,

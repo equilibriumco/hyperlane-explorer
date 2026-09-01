@@ -56,8 +56,7 @@ indexer" and the balance is silently omitted from the UI.
   exactly once in this dependency graph, so the override propagates into
   sdk/widgets and `protocol: 'midnight'` survives metadata validation. The
   canonical changeset lives on `equilibriumco/hyperlane-monorepo` branch
-  `midnight`; the vendored tarball in `vendor/` is a 33.0.2 backport of it,
-  because this app pins 33.0.2.
+  `midnight`; the vendored tarball in `vendor/` is packed straight from it.
 - Chain metadata, addresses, logos and the NIGHT warp route come from the
   registry via `NEXT_PUBLIC_REGISTRY_URL` / `_BRANCH` — the upstream
   custom-registry mechanism, no fork code. One real fix supports it: chain
@@ -78,16 +77,15 @@ indexer" and the balance is silently omitted from the UI.
 Only needed when the utils changeset changes.
 
 ```sh
-# in a checkout of equilibriumco/hyperlane-monorepo on the
-# midnight-utils-33.0.2 branch (upstream 33.0.2 release commit 4815a47cc)
-cd typescript/utils && pnpm pack
-# then copy the tarball over vendor/hyperlane-xyz-utils-33.0.2-midnight.tgz
+# in a checkout of equilibriumco/hyperlane-monorepo on the midnight branch
+cd typescript/utils && pnpm build && pnpm pack
+# then copy the tarball over vendor/hyperlane-xyz-utils-41.3.1-midnight.tgz
 # in this repo, keeping the filename, and re-run pnpm install
 ```
 
 The override pins the filename, so keeping the name means no other file needs
 touching. Nothing marks the tarball as patched apart from the `file:` path in
-the lockfile, so `package.json` still shows a plain `33.0.2`.
+the lockfile, so `package.json` still shows a plain `40.0.0`.
 
 ### Known limits
 
