@@ -78,7 +78,8 @@ indexer" and the balance is silently omitted from the UI.
 Only needed when the utils changeset changes.
 
 ```sh
-# in a checkout of equilibriumco/hyperlane-monorepo on the midnight branch
+# in a checkout of equilibriumco/hyperlane-monorepo on the
+# midnight-utils-33.0.2 branch (upstream 33.0.2 release commit 4815a47cc)
 cd typescript/utils && pnpm pack
 # then copy the tarball over vendor/hyperlane-xyz-utils-33.0.2-midnight.tgz
 # in this repo, keeping the filename, and re-run pnpm install
