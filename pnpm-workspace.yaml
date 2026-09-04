@@ -2,9 +2,22 @@
 minimumReleaseAge: 10080
 minimumReleaseAgeExclude:
   - '@hyperlane-xyz/*'
+  - oxfmt
+  - '@oxfmt/*'
+  - oxlint
+  - '@oxlint/*'
 overrides:
+  # Midnight: @hyperlane-xyz/utils 41.3.1 + ProtocolType.Midnight and its
+  # address codecs, packed straight from equilibriumco/hyperlane-monorepo
+  # branch midnight (typescript/utils). The app pins 40.0.0; the published
+  # 40.0.0 -> 41.3.1 utils surface is purely additive, so the override is
+  # safe. utils resolves exactly once in this dependency graph, so the
+  # override propagates into sdk/widgets, and the SDK's forwardCompatibleEnum
+  # reads the enum at runtime - `protocol: 'midnight'` survives metadata
+  # validation without an sdk override.
+  '@hyperlane-xyz/utils': file:vendor/hyperlane-xyz-utils-41.3.1-midnight.tgz
   tronweb>ethers: ^6.13.5
-  ethers: ^5.7
+  ethers: ^5.8
   sha.js: 2.4.12
   cipher-base: 1.0.5
   elliptic: 6.6.1
@@ -22,4 +35,5 @@ allowBuilds:
   secp256k1: false
   sharp: false
   tiny-secp256k1: false
+  unrs-resolver: false
   utf-8-validate: false

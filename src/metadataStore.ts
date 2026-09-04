@@ -12,7 +12,7 @@ import {
   type WarpRouteConfigs,
   type WarpRouteIdToAddressesMap,
 } from '@hyperlane-xyz/sdk/warp/read';
-import { objFilter } from '@hyperlane-xyz/utils';
+import { isRelativeUrl, objFilter, objMap } from '@hyperlane-xyz/utils';
 import { useMemo } from 'react';
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
@@ -33,6 +33,7 @@ interface MetadataState {
     overrides?: ChainMap<Partial<ChainMetadata> | undefined>,
   ) => Promise<void>;
   isChainMetadataLoaded: boolean;
+  chainMetadataError: Error | null;
   ensureChainMetadata: () => Promise<void>;
   registry: IRegistry;
   setRegistry: (registry: IRegistry) => void;
@@ -69,15 +70,19 @@ export const useStore = create<MetadataState>()(
       setChainMetadataOverrides: async (
         overrides: ChainMap<Partial<ChainMetadata> | undefined> = {},
       ) => {
-        const filtered = objFilter(overrides, (_, metadata) => !!metadata);
+        const filtered = objFilter(overrides, (_, metadata): metadata is Partial<ChainMetadata> =>
+          Boolean(metadata),
+        );
         clearPrefetchedMessages();
         set({
           chainMetadataOverrides: filtered,
           isChainMetadataLoaded: false,
+          chainMetadataError: null,
         });
         await get().ensureChainMetadata();
       },
       isChainMetadataLoaded: false,
+      chainMetadataError: null,
       ensureChainMetadata: async () => {
         const state = get();
         const { registry, chainMetadataOverrides } = state;
@@ -88,6 +93,7 @@ export const useStore = create<MetadataState>()(
           chainMetadataRequest.registry !== registry ||
           chainMetadataRequest.overrides !== chainMetadataOverrides
         ) {
+          set({ chainMetadataError: null });
           chainMetadataRequest = {
             registry,
             overrides: chainMetadataOverrides,
@@ -109,7 +115,19 @@ export const useStore = create<MetadataState>()(
           set({
             chainMetadata: metadata,
             isChainMetadataLoaded: true,
+            chainMetadataError: null,
           });
+        } catch (error) {
+          if (
+            get().registry === registry &&
+            get().chainMetadataOverrides === chainMetadataOverrides
+          ) {
+            set({
+              chainMetadataError:
+                error instanceof Error ? error : new Error('Failed to load chain metadata'),
+            });
+          }
+          throw error;
         } finally {
           if (chainMetadataRequest === request) {
             chainMetadataRequest = null;
@@ -128,6 +146,7 @@ export const useStore = create<MetadataState>()(
         set({
           chainMetadata: {},
           isChainMetadataLoaded: false,
+          chainMetadataError: null,
           registry,
           warpRouteChainAddressMap: {},
           warpRouteIdToAddressesMap: {},
@@ -231,7 +250,7 @@ async function loadWarpRouteData(registry: IRegistry): Promise<{
 
   try {
     logger.debug('Building warp route maps from GithubRegistry');
-    warpRouteConfigs = await registry.getWarpRoutes();
+    warpRouteConfigs = resolveTokenLogoUris(await registry.getWarpRoutes(), registry);
   } catch (error) {
     logger.error('Failed to build warp route maps from registry', error);
     if (!canUsePublishedWarpRouteFallback(registry)) throw error;
@@ -242,6 +261,26 @@ async function loadWarpRouteData(registry: IRegistry): Promise<{
   }
 
   return buildWarpRouteMaps(warpRouteConfigs);
+}
+
+// Token icons resolve relative logo paths against the canonical registry's
+// CDN (links.imgPath); a custom registry's logos do not exist there, so the
+// icons fall back to letters. Rewrite the relative paths to absolute URLs on
+// the configured registry instead. The published-configs fallback keeps its
+// relative paths — those refer to canonical content the CDN does serve.
+function resolveTokenLogoUris(
+  warpRouteConfigs: WarpRouteConfigs,
+  registry: IRegistry,
+): WarpRouteConfigs {
+  if (!config.registryUrl) return warpRouteConfigs;
+  return objMap(warpRouteConfigs, (_routeId, routeConfig) => ({
+    ...routeConfig,
+    tokens: routeConfig.tokens.map((token) =>
+      token.logoURI && isRelativeUrl(token.logoURI)
+        ? { ...token, logoURI: registry.getUri(token.logoURI) }
+        : token,
+    ),
+  }));
 }
 
 function canUsePublishedWarpRouteFallback(registry: IRegistry) {

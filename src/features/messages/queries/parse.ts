@@ -24,8 +24,9 @@ export function parseMessageStubResult(
   chainMetadataResolver: ChainMetadataResolver,
   scrapedChains: DomainsEntry[],
   data: MessagesStubQueryResult | undefined,
+  idOrder?: 'ASC' | 'DESC',
 ): MessageStub[] {
-  return queryResult(chainMetadataResolver, scrapedChains, data, parseMessageStub);
+  return queryResult(chainMetadataResolver, scrapedChains, data, parseMessageStub, idOrder);
 }
 
 export function parseMessageQueryResult(
@@ -34,6 +35,22 @@ export function parseMessageQueryResult(
   data: MessagesQueryResult | undefined,
 ): Message[] {
   return queryResult(chainMetadataResolver, scrapedChains, data, parseMessage);
+}
+
+export function parseMessageStubEntry(
+  chainMetadataResolver: ChainMetadataResolver,
+  scrapedChains: DomainsEntry[],
+  data: MessageStubEntry,
+): MessageStub | null {
+  return parseMessageStub(chainMetadataResolver, scrapedChains, data);
+}
+
+export function parseMessageEntry(
+  chainMetadataResolver: ChainMetadataResolver,
+  scrapedChains: DomainsEntry[],
+  data: MessageEntry,
+): Message | null {
+  return parseMessage(chainMetadataResolver, scrapedChains, data);
 }
 
 function queryResult<D, M extends MessageStub>(
@@ -45,6 +62,7 @@ function queryResult<D, M extends MessageStub>(
     scrapedChains: DomainsEntry[],
     data: D,
   ) => M | null,
+  idOrder?: 'ASC' | 'DESC',
 ) {
   if (!data || !Object.keys(data).length) return [];
   return deduplicateMessageList(
@@ -52,8 +70,18 @@ function queryResult<D, M extends MessageStub>(
       .flat()
       .map((d) => parseFn(chainMetadataResolver, scrapedChains, d))
       .filter((m): m is M => !!m)
-      .sort((a, b) => b.origin.timestamp - a.origin.timestamp),
+      .sort((a, b) => {
+        if (idOrder === 'ASC') return compareMessageIdsDescending(b, a);
+        if (idOrder === 'DESC') return compareMessageIdsDescending(a, b);
+        return b.origin.timestamp - a.origin.timestamp;
+      }),
   );
+}
+
+export function compareMessageIdsDescending(a: MessageStub, b: MessageStub): number {
+  const aId = BigInt(a.id);
+  const bId = BigInt(b.id);
+  return aId === bId ? 0 : aId > bId ? -1 : 1;
 }
 
 function parseMessageStub(

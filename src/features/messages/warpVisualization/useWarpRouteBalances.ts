@@ -10,7 +10,11 @@ import { useMemo } from 'react';
 import { useMultiProviderVersion, useReadyMultiProvider } from '../../../store';
 import { logger } from '../../../utils/logger';
 import type { ExplorerMultiProvider as MultiProtocolProvider } from '../../hyperlane/sdkRuntime';
-import { SUPPORTED_SEALEVEL_BALANCE_STANDARDS } from './tokenStandards';
+import { fetchMidnightWarpRouteBalance } from './midnightBalance';
+import {
+  SUPPORTED_MIDNIGHT_BALANCE_STANDARDS,
+  SUPPORTED_SEALEVEL_BALANCE_STANDARDS,
+} from './tokenStandards';
 import {
   ChainBalance,
   getWarpRouteTokenKey,
@@ -68,6 +72,11 @@ function isSupportedSealevelStandard(standard: TokenStandard | string | undefine
   return SUPPORTED_SEALEVEL_BALANCE_STANDARDS.includes(standard as TokenStandard);
 }
 
+function isSupportedMidnightStandard(standard: TokenStandard | string | undefined): boolean {
+  if (!standard) return false;
+  return SUPPORTED_MIDNIGHT_BALANCE_STANDARDS.includes(standard as TokenStandard);
+}
+
 function getApiBalance(data: unknown): bigint | undefined {
   if (!data || typeof data !== 'object') return undefined;
   const { balance } = data as Record<string, unknown>;
@@ -97,6 +106,15 @@ async function fetchSealevelTokenBalance(
   return balance === undefined ? undefined : { balance };
 }
 
+// Like Sealevel, Midnight balances are read server-side: the browser bundle
+// has no Midnight provider, so the API route queries the chain's indexer.
+async function fetchMidnightTokenBalance(
+  token: WarpRouteTokenVisualization,
+): Promise<ChainBalance | undefined> {
+  const balance = await fetchMidnightWarpRouteBalance(token);
+  return balance === undefined ? undefined : { balance };
+}
+
 /**
  * Fetch the balance data for a single token
  */
@@ -107,6 +125,10 @@ async function fetchTokenBalance(
   try {
     if (isSupportedSealevelStandard(token.standard)) {
       return await fetchSealevelTokenBalance(token);
+    }
+
+    if (isSupportedMidnightStandard(token.standard)) {
+      return await fetchMidnightTokenBalance(token);
     }
 
     const adapter = createEvmHypAdapter(multiProvider, token);
@@ -164,6 +186,7 @@ function shouldFetchSupply(token: WarpRouteTokenVisualization): boolean {
     isCollateralTokenStandard(token.standard) ||
     isSupportedCollateralStandard(token.standard) ||
     isSupportedSealevelStandard(token.standard) ||
+    isSupportedMidnightStandard(token.standard) ||
     isSupportedXERC20Standard(token.standard) ||
     isSupportedSyntheticStandard(token.standard)
   );
